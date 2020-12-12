@@ -1,0 +1,2 @@
+from distutils.core import setup
+setup(name='quant',version='1.0',author='eric',py_modules=['quant.force','quant.kdj','quant.MACD','quant.nineTurn','quant.MoveMentROC','quant.Pivot','quant.Trix','quant.Util','quant.weekTrend'])
