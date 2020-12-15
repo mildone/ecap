@@ -2136,7 +2136,7 @@ def backtestv2(holdingperc = 3):
     print('init account')
     Account = QA.QA_Account(user_cookie='eric', portfolio_cookie='eric')
     Broker = QA.QA_BacktestBroker()
-    Account.reset_assets(200000)
+    Account.reset_assets(100000)
     Account.account_cookie = 'ECAP'
     # codelist=['600797','000977','601068','601069','000977']
     # 云计算，华为，5G概念
@@ -2162,9 +2162,9 @@ def backtestv2(holdingperc = 3):
     cur = datetime.datetime.now()
     # endtime = str(cur.year) + '-' + str(cur.month) + '-' + str(cur.day)
     #endtime = '2020-06-01'
-    endtime = '2020-11-30'
-    cl = ['000977', '600745','002889','600340','000895','600019','600028',
-          '601857','600585','002415','002475','600031','600276','600009','601318',
+    endtime = '2020-12-10'
+    cl = ['000977', '600745','002889','600340','000895','600019',
+          '600585','002415','002475','600031','600276','600009','601318',
           '000333','600031','002384','002241','600703','000776','600897','600085']
     codelist2.extend(cl)
     codelist = list(set(codelist2))
@@ -2172,9 +2172,9 @@ def backtestv2(holdingperc = 3):
     test = []
     #test = ['000977','600745','002241','000333']
     if('515880' in test or '515050' in test):
-        data = loadLocalDataIndex(cl,'2019-01-01',endtime)
+        data = loadLocalDataIndex(cl,'2017-01-01',endtime)
     else:
-        data = loadLocalData(cl, '2019-01-01', endtime)
+        data = loadLocalData(cl, '2017-01-01', endtime)
     if ('515880' in test or '515050' in test):
         pass
     else:
@@ -2224,7 +2224,7 @@ def backtestv2(holdingperc = 3):
     #ind = data.add_func(EMAOP)
     # cur = datetime.datetime.now()
     # endtime = str(cur.year) + '-' + str(cur.month) + '-' + str(cur.day)
-    data_forbacktest = data.select_time('2019-01-01', endtime)
+    data_forbacktest = data.select_time('2017-01-01', endtime)
     deal = {}
     for items in data_forbacktest.panel_gen:
         for item in items.security_gen:
