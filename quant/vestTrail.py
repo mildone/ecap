@@ -6,7 +6,7 @@ except AssertionError:
     import QUANTAXIS as QA
 import numpy as np
 
-read_dictionary = np.load('../liutong.npy', allow_pickle=True).item()
+read_dictionary = np.load('/Users/jiangyongnan/git/ecap/liutong.npy', allow_pickle=True).item()
 
 import quant.Pivot as pi
 import quant.force as force

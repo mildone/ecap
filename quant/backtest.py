@@ -13,7 +13,7 @@ import re
 import numpy as np
 import quant.Util as uti
 import matplotlib.pyplot as plt
-read_dictionary = np.load('../liutong.npy',allow_pickle=True).item()
+read_dictionary = np.load('/Users/jiangyongnan/git/ecap/liutong.npy',allow_pickle=True).item()
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

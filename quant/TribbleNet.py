@@ -12,7 +12,7 @@ except AssertionError:
 import numpy as np
 import re
 
-read_dictionary = np.load('../liutong.npy', allow_pickle=True).item()
+read_dictionary = np.load('/Users/jiangyongnan/git/ecap/liutong.npy', allow_pickle=True).item()
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtk

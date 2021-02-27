@@ -91,15 +91,11 @@ def analysis(df, st='2020-01-01',end='cur'):
 
     stock = getStocklist()
 
-    codelist3 = QA.QA_fetch_stock_block_adv().get_block('云计算').code[:]
-    codelist1 = QA.QA_fetch_stock_block_adv().get_block('华为概念').code[:]
-    codelist2 = QA.QA_fetch_stock_block_adv().get_block('5G概念').code[:]
-    # codelist4 = QA.QA_fetch_stock_block_adv().get_block('国产软件').code[:]
-    codelist2.extend(codelist3)
-    codelist2.extend(codelist1)
-
-    codelist = list(set(codelist2))
     m = loadLocalData(stock)
+    print('update liutong daily')
+    updateliutong(stock)
+
+
     num = 0
     win = 0
     ind = m.add_func(change)
@@ -119,7 +115,7 @@ def analysis(df, st='2020-01-01',end='cur'):
             # print('{} at {} with {} and {}'.format(item.code[0], item.date[0], item.close[0], daily_ind.change.iloc[0]))
             if (daily_ind.CS.iloc[0] > 0):
                 win += 1
-        print('{} with {}'.format(item.date[0], win / num))
+        print('{} with {}'.format(item.date[0], round(win / num,3)))
         if(str(item.date[0])  not in candidate):
             print('adding '+str(item.date[0]))
             df.loc[item.date[0]] = win / num
@@ -187,14 +183,31 @@ def contextPlot(df,start='2020-01-01',end='cur'):
     fig.autofmt_xdate()
 
     plt.show()
+def blockCode(block):
+    '''
+    e.g. blockcode('深证300')
+    '''
+    stocklist = QA.QA_fetch_stock_block_adv().data
+    code = stocklist.loc[block].index.get_level_values('code').to_list()
+    return code
+
 
 def updateRecord(df):
-    df.to_csv('marketwidth.csv')
+    df.to_csv('/Users/jiangyongnan/git/ecap/monitor/marketwidth.csv')
+
+def updateliutong(stock):
+    liutongDict = {}
+    for item in stock:
+        sratio = QA.QA_fetch_get_stock_info('pytdx', item).liutongguben[0]
+        liutongDict[item] = sratio
+    np.save('/Users/jiangyongnan/git/ecap/liutong.npy', liutongDict)
+    print('done update liutong')
+
 
 if __name__ == '__main__':
     #analysis()
-    if(os.path.exists('./marketwidth.csv')):
-        m = pd.read_csv('./marketwidth.csv')
+    if(os.path.exists('/Users/jiangyongnan/git/ecap/monitor/marketwidth.csv')):
+        m = pd.read_csv('/Users/jiangyongnan/git/ecap/monitor/marketwidth.csv')
         m.set_index('date',inplace=True)
     #this is to reload data on top
         stime = m.index.get_level_values('date')[-21]
@@ -204,7 +217,7 @@ if __name__ == '__main__':
         m = pd.DataFrame(start)
         m.set_index('date', inplace=True)
     df = analysis(m,st=stime,end='cur')
-    contextPlot(df)
+    #contextPlot(df)
     updateRecord(df)
 
 

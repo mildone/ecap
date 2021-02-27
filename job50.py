@@ -3,6 +3,7 @@ import re
 import smtplib
 from email.mime.text import MIMEText
 import QUANTAXIS as QA
+from retrying import retry
 try:
     assert QA.__version__>='1.1.0'
 except AssertionError:
@@ -10,7 +11,7 @@ except AssertionError:
     import QUANTAXIS as QA 
 import pandas as pd
 import numpy as np
-read_dictionary = np.load('/home/mildone/Project/quanaly/liutong.npy',allow_pickle=True).item()
+read_dictionary = np.load('/Users/jiangyongnan/git/ecap/liutong.npy',allow_pickle=True).item()
 
 def wds(df):
     df['date'] = pd.to_datetime(df.index.get_level_values('date'))
@@ -181,24 +182,28 @@ def TrendWeekMin(codes, start='2019-01-01', freq='15min', short=20, long=60,type
         sample = daydata.select_code(
             code).data  # this is only the data till today, then contact with daydata ms.select_code('000977').data
 
-        try:
-            if(type=='index'):
-                td = QA.QAFetch.QATdx.QA_fetch_get_index_day(code, et, et)
-            else:
-                td = QA.QAFetch.QATdx.QA_fetch_get_stock_day(code,et,et)
-            print(td)
-        except:
-            print('None and try again')
-            if(type=='index'):
-                td = QA.QAFetch.QATdx.QA_fetch_get_index_day(code, et, et, if_fq='bfq')
-            else:
-                td = QA.QAFetch.QATdx.QA_fetch_get_stock_day(code,et,et,if_fq='bfq')
-        td.set_index(['date','code'],inplace=True)
-        td.drop(['date_stamp'], axis=1, inplace=True)
-        td.rename(columns={'vol': 'volume'}, inplace=True)
-        sample = pd.concat([td, sample], axis=0,sort=True)
-        sample.sort_index(inplace=True,level='date')
+        attempts = 0
+        success = False
+        while attempts < 3 and not success:
+            try:
+                #deal with network issue
+                if(type=='index'):
+                    td = QA.QAFetch.QATdx.QA_fetch_get_index_day(code, et, et)
+                else:
+                    td = QA.QAFetch.QATdx.QA_fetch_get_stock_day(code,et,et)
 
+                td.set_index(['date','code'],inplace=True)
+                td.drop(['date_stamp'], axis=1, inplace=True)
+                td.rename(columns={'vol': 'volume'}, inplace=True)
+                sample = pd.concat([td, sample], axis=0,sort=True)
+                sample.sort_index(inplace=True,level='date')
+                success = True
+            except:
+                attempts += 1
+                if attempts == 3:
+                    break
+        print(td)
+        sample['atr'] = QA.QA_indicator_ATR(sample, 20).ATR
         # now deal with week status
         # wend = sample.index.get_level_values(dayindex)[-1].strftime(dayformate)
         # temp = QA.QA_fetch_stock_day_adv(code, wstart, wend).data
@@ -223,9 +228,10 @@ def TrendWeekMin(codes, start='2019-01-01', freq='15min', short=20, long=60,type
         m15.rename(columns={'vol': 'volume'}, inplace=True)
         ms = pd.concat([m15, md], axis=0,sort=True)
         ms.sort_index(inplace=True, level='datetime')
-
-        ms['short'] = QA.EMA(ms.close, short)
-        ms['long'] = QA.EMA(ms.close, long)
+        import core.Util as util
+        util.divergence(ms)
+        #ms['short'] = QA.EMA(ms.close, short)
+        #ms['long'] = QA.EMA(ms.close, long)
         CROSS_5 = QA.CROSS(ms.short, ms.long)
         CROSS_15 = QA.CROSS(ms.long, ms.short)
 
@@ -243,18 +249,19 @@ def TrendWeekMin(codes, start='2019-01-01', freq='15min', short=20, long=60,type
             anchor = -8
 
         sig = ms[-16:].single.sum()
+        rts = ms.RTS[-1]
         if (direction > 0 and trendv >0 and sig == 1):
-            buyres.append(code)
-        elif (direction < 0 and sig == 3):
+            buyres.append(code+'--'+str(round(sample.atr[-1],2)))
+        elif (direction < 0 and rts>3):
             sellres.append(code)
     return buyres, sellres
 
 def sendmail(content):
     msg_from = 'skiping1982@163.com'  # 发送方邮箱
     passwd = 'jyn821014'  # 填入发送方邮箱的授权码(填入自己的授权码，相当于邮箱密码)
-    msg_to = ['ynjiang@foxmail.com','skiping1982@163.com']  # 收件人邮箱
+    msg_to = ['ynjiang@foxmail.com','skiping1982@163.com','yuanwenbing@sunpower.com.cn']  # 收件人邮箱
 
-    subject = "[INFO]需要跟进项目进度 "+datetime.datetime.now().strftime('%Y-%m-%d')  # 主题
+    subject = "[INFO_BACK]需要跟进项目进度 "+datetime.datetime.now().strftime('%Y-%m-%d')  # 主题
     content = content
 # 生成一个MIMEText对象（还有一些其它参数）
 # _text_:邮件内容
@@ -299,7 +306,7 @@ if __name__ == "__main__":
 
 
     if(len(buy)==1):
-        buy[0] = 'buy nostock'
+        buy[0] = ' buy nostock'
     if(len(sell)==1):
         sell[0]='sell nostock'
     if(len(eb)==1):
@@ -308,9 +315,13 @@ if __name__ == "__main__":
         es[0] = 'sell noetf'
     #buy.insert(0,'buy ')
     #sell.insert(0,'sell ')
+    buy.append('\n')
     buy.extend(sell)
+    buy.append('\n')
     buy.extend(eb)
+    buy.append('\n')
     buy.extend(es)
+    buy.append('\n')
 
     #if(len(buy)>4):
         #print(' '.join(buy))
@@ -320,8 +331,11 @@ if __name__ == "__main__":
 
 
     print("sending mail")
-    if(len(buy)>4 ):
+    if(len(buy)>8 ):
         sendmail(' '.join(buy))
+    else:
+        sendmail('another peaceful day')
+
 
 
 

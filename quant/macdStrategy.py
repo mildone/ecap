@@ -8,7 +8,7 @@ except AssertionError:
     print('pip install QUANTAXIS >= 1.1.0 请升级QUANTAXIS后再运行此示例')
     import QUANTAXIS as QA
 import numpy as np
-read_dictionary = np.load('../liutong.npy',allow_pickle=True).item()
+read_dictionary = np.load('/Users/jiangyongnan/git/ecap/liutong.npy',allow_pickle=True).item()
 import pandas as pd
 import numpy as np
 import quant.Util as uti

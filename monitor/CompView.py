@@ -15,13 +15,16 @@ import core.zoom as zo
 import pandas as pd
 
 def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stock'):
+    wshort =5
+    wmid = 10
+    wlong = 15
     endn = end
     td = uti.prepareData(code,end=endn,cg=cg)
 
 
 
     wk = zo.wds(td,duration='w')
-    zo.divergence(wk)
+    zo.divergence(wk,short=5,mid=10,long=15)
     wqu = uti.candlestruct(wk)
 
     t15 = uti.prepareData(code,start = '2020-01-01',frequence='15min',end=endn,cg=cg)
@@ -214,22 +217,24 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     ax21 = fig.add_subplot(gs[7:11, 0:4],sharex=ax210)
     ax21.set_title("week", fontsize='xx-large', fontweight='bold')
     mpf.candlestick_ochl(ax21, wqu, width=0.6, colorup='r', colordown='g', alpha=1.0)
-
-    ax21.plot(indw, wk.sh, 'r-', label='short', linewidth=0.7)
-    ax21.plot(indw, wk.mi, 'blue', label='mid', linewidth=0.7)
-    ax21.plot(indw, wk.lo, 'purple', label='long', linewidth=0.7)
+    #this applies the same as we take week CS<0 as exit
+    ax21.plot(indw, wk.short, 'r-', label='short', linewidth=0.7)
+    print('check the weektrend in console')
+    print(wk)
+    ax21.plot(indw, wk.mid, 'blue', label='mid', linewidth=0.7)
+    ax21.plot(indw, wk.long, 'purple', label='long', linewidth=0.7)
     ratio = wk.low.median() * 0.03
-    if(NW>short):
-        ax21.plot(NW - short, wk.low[NW - short] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    if(NW>wshort):
+        ax21.plot(NW - wshort, wk.low[NW - wshort] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='red')
     else:
         pass
     # ax2.axvline(x=N-short,ls='--',color='purple')
-    if(NW>mid):
-        ax21.plot(NW - mid, wk.low[NW - mid] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    if(NW>wmid):
+        ax21.plot(NW - wmid, wk.low[NW - wmid] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='blue')
-    if(NW>long):
-        ax21.plot(NW - long, wk.low[NW - long] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    if(NW>wlong):
+        ax21.plot(NW - wlong, wk.low[NW - wlong] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='purple')
 
 
@@ -249,7 +254,7 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     plt.show()
 
 if __name__ == '__main__':
-    compView('000977','2018-01-01','cur',zoom=1000,cg='stock')
+    compView('600019','2018-01-01','cur',zoom=500,cg='stock')
 
 
 

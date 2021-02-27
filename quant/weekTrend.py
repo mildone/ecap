@@ -61,12 +61,23 @@ def TrendDivergence(wk, short=20, mid=60, long=120):
 
 
 def TrendDetect(sample,short=5,mid=10,long=15):
+    #sample['sh'] = QA.MA(sample.close,short)
+    sample['sh'] = pd.Series.rolling(sample.close, short).mean()
+    #sample['mi'] = QA.MA(sample.close,mid)
+    sample['mi'] = pd.Series.rolling(sample.close, mid).mean()
+    #sample['lo'] = QA.MA(sample.close,long)
+    sample['lo'] = pd.Series.rolling(sample.close, long).mean()
     sample['short'] = pd.Series.ewm(sample.close, span=short, min_periods=short - 1, adjust=True).mean()
     sample['mid'] = pd.Series.ewm(sample.close, span=mid, min_periods=mid - 1, adjust=True).mean()
     sample['long'] = pd.Series.ewm(sample.close, span=long, min_periods=long - 1, adjust=True).mean()
     sample['CS'] = (sample.close - sample.short) * 100 / sample.short
     sample['SM'] = (sample.short - sample.mid) * 100 / sample.mid
     sample['ML'] = (sample.mid - sample.long) * 100 / sample.long
+
+    sample['CSMA'] = (sample.close - sample.sh) * 100 / sample.sh
+    sample['SMMA'] = (sample.sh - sample.mi) * 100 / sample.mi
+    sample['MLMA'] = (sample.mi - sample.lo) * 100 / sample.lo
+
     sample['BIAS'] =(sample.close-sample.long) * 100/ sample.long
     return sample
 
