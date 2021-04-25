@@ -14,6 +14,7 @@ import core.Util as uti
 import core.zoom as zo
 import pandas as pd
 
+
 def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stock'):
     wshort =5
     wmid = 10
@@ -218,11 +219,16 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     ax21.set_title("week", fontsize='xx-large', fontweight='bold')
     mpf.candlestick_ochl(ax21, wqu, width=0.6, colorup='r', colordown='g', alpha=1.0)
     #this applies the same as we take week CS<0 as exit
-    ax21.plot(indw, wk.short, 'r-', label='short', linewidth=0.7)
     print('check the weektrend in console')
     print(wk)
-    ax21.plot(indw, wk.mid, 'blue', label='mid', linewidth=0.7)
-    ax21.plot(indw, wk.long, 'purple', label='long', linewidth=0.7)
+
+    ax21.plot(indw, wk.short, 'r-', label='short', linewidth=0.5, ls = '--')
+    ax21.plot(indw, wk.mid, 'blue', label='mid', linewidth=0.5,ls='--')
+    ax21.plot(indw, wk.long, 'purple', label='long', linewidth=0.5,ls='--')
+
+    ax21.plot(indw, wk.sh, 'r-', label='short MA', linewidth=0.7)
+    ax21.plot(indw, wk.mi, 'blue', label='mid MA', linewidth=0.7)
+    ax21.plot(indw, wk.lo, 'purple', label='long MA', linewidth=0.7)
     ratio = wk.low.median() * 0.03
     if(NW>wshort):
         ax21.plot(NW - wshort, wk.low[NW - wshort] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
@@ -254,7 +260,7 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     plt.show()
 
 if __name__ == '__main__':
-    compView('600019','2018-01-01','cur',zoom=500,cg='stock')
+    compView('600897','2018-01-01','cur',zoom=500,cg='stock')
 
 
 

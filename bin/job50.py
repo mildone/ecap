@@ -1,6 +1,7 @@
 import datetime
 import re
 import smtplib
+from email.header import Header
 from email.mime.text import MIMEText
 import QUANTAXIS as QA
 from retrying import retry
@@ -86,10 +87,13 @@ def TrendWeekMin(codes, start='2019-01-01', freq='15min', short=20, long=60,type
     #et = '2021-02-25'
 
     #wstart = '2018-01-01'
+    '''
     if(type=='index'):
         buyres = ['buyetf ']
     else:
         buyres = ['buystock ']
+    '''
+    buyres = []
     sellres = []
     # now let's get today data from net, those are DataStructure
     if(type=='index'):
@@ -185,45 +189,83 @@ def TrendWeekMin(codes, start='2019-01-01', freq='15min', short=20, long=60,type
             buyres.append(code+'-atr-'+str(round(sample.atr[-1],2)))
         elif (direction < 0 and rts > 3):
             sellres.append(code)
+    buy = list(set(buyres))
     sell = list(set(sellres))
     if (type == 'index'):
+        buy.insert(0,'buyetf ')
         sell.insert(0, 'selletf ')
     else:
+        buy.insert(0,'buystock ')
         sell.insert(0, 'sellstock ')
-    return buyres, sell
+    return buy, sell
 
 def sendmail(content):
-    msg_from = 'skiping1982@163.com'  # 发送方邮箱
-    passwd = 'jyn821014'  # 填入发送方邮箱的授权码(填入自己的授权码，相当于邮箱密码)
-    msg_to = ['ynjiang@foxmail.com','skiping1982@163.com','yuanwenbing@sunpower.com.cn']  # 收件人邮箱
-    #msg_to = ['skiping1982@163.com']  # 收件人邮箱
-    subject = "[INFO_BACK]需要跟进项目进度 "+datetime.datetime.now().strftime('%Y-%m-%d')  # 主题
+    msg_from = 'mildone82@163.com'  # 发送方邮箱
+    passwd = 'NOYTMHWQZRFDIQZI'  # 填入发送方邮箱的授权码(填入自己的授权码，相当于邮箱密码)
+    msg_to = ['ynjiang@foxmail.com','wenbing181@163.com']  # 收件人邮箱
+    #msg_to = ['wenbing181@163.com']  # 收件人邮箱
+    subject = "同步情况"+datetime.datetime.now().strftime('%Y-%m-%d')  # 主题
     content = content
 # 生成一个MIMEText对象（还有一些其它参数）
 # _text_:邮件内容
-    msg = MIMEText(content)
+    msg = MIMEText(content,'plain', 'utf-8')
 # 放入邮件主题
-    msg['Subject'] = subject
+    #msg['Subject'] = subject
 # 也可以这样传参
-# msg['Subject'] = Header(subject, 'utf-8')
+    msg['Subject'] = Header(subject, 'utf-8')
 # 放入发件人
     msg['From'] = msg_from
 # 放入收件人
-    msg['To'] = 'ynjiang@foxmail.com'
+    msg['To'] = msg_to[0]
 # msg['To'] = '发给你的邮件啊'
     try:
     # 通过ssl方式发送，服务器地址，端口
+
         s = smtplib.SMTP_SSL("smtp.163.com", 465)
     # 登录到邮箱
         s.login(msg_from, passwd)
     # 发送邮件：发送方，收件方，要发送的消息
-        s.sendmail(msg_from, msg_to, msg.as_string())
+        s.sendmail(msg_from, msg_to[0], msg.as_string())
+        msg['To']=msg_to[1]
+        s.sendmail(msg_from, msg_to[1], msg.as_string())
         print('success sent')
     except s.SMTPException as e:
         print(e)
     finally:
         s.quit()
+def sendmail(content,msg_to):
+    msg_from = 'mildone82@163.com'  # 发送方邮箱
+    passwd = 'NOYTMHWQZRFDIQZI'  # 填入发送方邮箱的授权码(填入自己的授权码，相当于邮箱密码)
+    #msg_to = ['ynjiang@foxmail.com','wenbing181@163.com']  # 收件人邮箱
+    #msg_to = ['wenbing181@163.com']  # 收件人邮箱
+    subject = "[Project Status]"+datetime.datetime.now().strftime('%Y-%m-%d')  # 主题
+    content = content
+# 生成一个MIMEText对象（还有一些其它参数）
+# _text_:邮件内容
+    msg = MIMEText(content,'plain', 'utf-8')
+# 放入邮件主题
+    #msg['Subject'] = subject
+# 也可以这样传参
+    msg['Subject'] = Header(subject, 'utf-8')
+# 放入发件人
+    msg['From'] = msg_from
+# 放入收件人
+    msg['To'] = msg_to
+# msg['To'] = '发给你的邮件啊'
+    try:
+    # 通过ssl方式发送，服务器地址，端口
 
+        s = smtplib.SMTP_SSL("smtp.163.com", 465)
+    # 登录到邮箱
+        s.login(msg_from, passwd)
+    # 发送邮件：发送方，收件方，要发送的消息
+        s.sendmail(msg_from, msg_to, msg.as_string())
+
+        print('success sent to '+msg_to)
+    except s.SMTPException as e:
+        print(e)
+    finally:
+        s.quit()
 
 
     
@@ -231,19 +273,23 @@ if __name__ == "__main__":
     import warnings
     warnings.filterwarnings('ignore')
     cl = ['000977', '600745',
-          # '002889',
-          '600340', '000895', '600019',
-          '600585', '002415', '002475', '600031', '600276', '600009', '601318', '002230', '600875',
-          '000333', '600031', '002384', '002241', '600703', '000776', '600897', '600085',
-          # '000651','300054','300046','002352',
-          # '600438',
+          #'002889',
+          '600340','000895','600019',
+        '600585','002415','002475','600031','600276','600009','601318','002230','600875',
+          '000333','600031','002384','002241','600703','000776','600897','600085',
+          #'000651','300054','300046','002352',
+          #'600438',
           '000651',
           '601318',
           '600036',
           '300059',
+          # 消费ETF 成分股
+          '300015',
+          '300498',
+          '600438',
           '600887'
           ]
-    etf = ['515880','515050']
+    etf = ['515880','515050','000001']
     print('>'*100)
     buy,sell = TrendWeekMin(cl)
     print(buy)
@@ -277,10 +323,11 @@ if __name__ == "__main__":
     # codelist1.extend(codelist4)
     #message = list(set(buy))
 
-
+    msg_to = ['ynjiang@foxmail.com', 'wenbing181@163.com']
     print("sending mail")
     if(len(buy)>8 ):
-        sendmail(' '.join(buy))
+        for i in msg_to:
+            sendmail(' '.join(buy),i)
     else:
         sendmail('another peaceful day')
     

@@ -619,7 +619,7 @@ def forceANA(code,zo=100,ty = 'EA',cg = 'stock', st = 20, mi = 60, ln = 120, pt=
 
 if __name__ == "__main__":
 
-    forceANA('600019',zo=500,ty = 'EMA', cg = 'stock', st = 20, mi = 60, ln = 120, pt='SML',nm=3,bias=True)
+    forceANA('000001',zo=500,ty = 'EMA', cg = 'index', st = 20, mi = 60, ln = 120, pt='SML',nm=3,bias=True)
     #api = QA.QA_TTSBroker()
     #test = QA.QA_fetch_get_stock_info('tdx','002415').liutongguben[0]
     #print(test)

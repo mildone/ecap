@@ -61,6 +61,8 @@ def TrendDivergence(wk, short=20, mid=60, long=120):
 
 
 def TrendDetect(sample,short=5,mid=10,long=15):
+    #5，10，15  87
+    #10，15，20  87
     #sample['sh'] = QA.MA(sample.close,short)
     sample['sh'] = pd.Series.rolling(sample.close, short).mean()
     #sample['mi'] = QA.MA(sample.close,mid)
