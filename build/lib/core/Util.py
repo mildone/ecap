@@ -25,6 +25,7 @@ dayindex = 'date'
 dayformate = '%Y-%m-%d'
 startday = '2018-01-01'
 wstartday = '2015-01-01'
+read_dictionary = np.load('/Users/jiangyongnan/git/ecap/liutong.npy',allow_pickle=True).item()
 
 def percSet(pw, rw, rl):
     pw = 0.47  # backtest win ratio
@@ -78,7 +79,27 @@ def calAngle(df):
     """
     trend angle based on provided dataframe
     """
-    return ABuRegUtil.calc_regress_deg(df.close.values, show=False)
+    return round(ABuRegUtil.calc_regress_deg(df.close.values, show=False),2)
+
+def calAngleDF(df, period=60):
+    """
+    period can be set based on situation.
+    detect the angle change form negative to positive
+    """
+    trend = []
+    ratio = []
+    for i in range(0, df.shape[0]):
+        # print(i)
+        if (i < period):
+            trend.append(calAngle(df.iloc[:period]))
+            #ratio.append(df.iloc[i].amount * period / sum(df.iloc[0:period].amount))
+        else:
+            trend.append(calAngle(df.iloc[i - period + 1:i + 1]))
+            #ratio.append(df.iloc[i].amount * 5 / sum(df.iloc[i - 5:i].amount))
+    df['trend'] = trend
+    #df['amountRatio'] = ratio
+    return df
+
 
 def change_jump(df):
     jumpratio = df.close.median() * 0.03
@@ -118,6 +139,26 @@ def positionN(sample,total=100000, risk=0.01):
     ATR = QA.QA_indicator_ATR(sample,20)
     return 4*(total*risk)/(ATR.ATR[-1])
 
+def switchCap(day):
+    #now we use fixed liutong
+    read_dictionary = np.load('/Users/jiangyongnan/git/ecap/liutong.npy',allow_pickle=True).item()
+    code = day.index.get_level_values('code')[-1]
+    sratio = read_dictionary[code]
+    day['dd']= sratio/day.vol
+
+def AvgHSL(data):
+    va = read_dictionary[data.index.get_level_values('code')[0]]
+    data['HSL'] = round(data.volume * 100 / va, 4)
+    data['DD'] = (va / (data.volume * 100)).astype(int)
+    N = data.shape[0]
+    avg = []
+    for i in range(N):
+        if (i - data.DD[i] < 0):
+            avg.append(data.close[i])
+        else:
+            avg.append(round(pd.Series(data.close[i - data.DD[i] + 1:i + 1]).mean(), 2))
+    data['AVG'] = avg
+    return data
 
 
 def divergence( day,short = 20, mid = 60, long = 120):
@@ -139,6 +180,7 @@ def divergence( day,short = 20, mid = 60, long = 120):
     day['long'] = QA.EMA(day.close, long)
     day['lo'] = QA.MA(day.close, long)
     day['mi'] = QA.MA(day.close, mid)
+    day['vol6'] = QA.EMA(day.volume,mid)
     day['sh'] = QA.MA(day.close, short)
     day['mid'] = QA.EMA(day.close, mid)
     day['short'] = QA.EMA(day.close, short)
@@ -152,15 +194,18 @@ def divergence( day,short = 20, mid = 60, long = 120):
     day['SMAcc'] = change(day.SM)
     #Mid and Long MA
     day['MLAcc'] = change(day.ML)
+    day['TR'] = (day.close > day.short).astype(int) + (day.close > day.sh).astype(int) + (day.short > day.mid).astype(int) \
+                + (day.sh > day.mi).astype(int) + (day.mi > day.lo).astype(int) + (day.mid > day.long).astype(int)
     day['TS'] = (day.close > day.short).astype(int) + (day.close > day.sh).astype(int) + (day.close > day.mid).astype(int)\
                 + (day.close > day.mi).astype(int) + (day.sh > day.mi).astype(int)
     day['RTS'] = (day.short > day.close).astype(int) + (day.sh > day.close).astype(int) + (day.mid > day.close).astype(int)\
                  + (day.mi > day.close).astype(int) + (day.mi > day.sh).astype(int)
 
     return day
+def getBlock():
+    stocklist = QA.QA_fetch_stock_block_adv()
 
-
-def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML',numofax = 3, mark = False,bias = False):
+def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML',numofax = 3, mark = False,bias = False,cg='stock'):
     """
     value of Type:
     * E or A  at least 1, E means EMA, A means MA
@@ -171,9 +216,10 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
     when bias is set as True, it will plot Close/Long, SM, CS
     by default we take CS, SM, ML
     """
-
+    if(cg=='stock'):
+        AvgHSL(day)
     divergence(day,short,mid,long)
-
+    calAngleDF(day,period=60)
 
     if (zoom > day.shape[0]):
         day = day[0:]
@@ -190,9 +236,9 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
         return day.index.get_level_values(dayindex)[thisind]
 
     if(numofax==1):
-        fig = plt.figure()
+        fig = plt.figure(figsize=(40, 20), dpi=90)
         gs = gridspec.GridSpec(3, 1)
-        fig.set_size_inches(30.5, 20.5)
+        #fig.set_size_inches(30.5, 20.5)
         ax2 = fig.add_subplot(gs[1:3,0:1])
         ax2.set_title("candlestick", fontsize='xx-large', fontweight='bold')
 
@@ -303,9 +349,10 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
 
         plt.show()
     elif(numofax==3):
-        fig = plt.figure()
-        fig.set_size_inches(40.5, 20.5)
-        gs = gridspec.GridSpec(7, 1)
+        fig = plt.figure(figsize=(40, 20), dpi=90)
+        #plt.figure()
+        #fig.set_size_inches(40.5, 20.5)
+        gs = gridspec.GridSpec(9, 1)
 
         ax3 = fig.add_subplot(gs[0:1, 0:1])
         #ax3.set_title("Divergence", fontsize='xx-large', fontweight='bold')
@@ -338,8 +385,11 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
         bar_green = np.where(day.close < day.open, day.volume, 0)
         ax1.bar(ind, bar_red, color='red')
         ax1.bar(ind, bar_green, color='green')
+
+        #ax1.plot(ind,day.trend,'red',label='trend',linewidth=1)
         # ax3.plot(ind,day.vma,'orange',label='volume EMA20')
-        ax1.axhline(y=day.volume.median(), ls='--', color='grey')
+        #ax1.axhline(y=day.volume.median(), ls='--', color='grey')
+        ax1.plot(ind,day.vol6,'grey',label='vol EMA60',linewidth=0.5)
         # x3.bar(ind,day.BIAS,color='blue')
         # ax3.axhline(y=0,ls='--',color='yellow')
         ax1.grid(True)
@@ -347,10 +397,31 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
         ax1.legend(loc='upper left')
         fig.autofmt_xdate()
 
+        ax12 = fig.add_subplot(gs[7:9, 0:1], sharex=ax3)
+        # ax1.set_title("volume", fontsize='xx-large', fontweight='bold')
+        if(cg=='stock'):
+            ax12.plot(ind, day.AVG, 'black', label='AVG', linewidth=0.7)
+        ax12.plot(ind, day.close, 'red', label='CLOSE', linewidth=0.7)
+        ax12.plot(ind, day.lo, 'purple', label='LO120', linewidth=0.5,ls='--')
+        ax12.plot(ind, day.mi, 'blue', label='MID60', linewidth=0.5, ls='--')
+        '''
+        bar_red2 = np.where(day.trend > 0, day.trend, 0)
+        bar_green2 = np.where(day.trend<0, day.trend, 0)
+        ax12.bar(ind, bar_red2, color='red')
+        ax12.bar(ind, bar_green2, color='green')
+        ax12.axhline(y=5, ls='--', color='grey')
+        '''
+
+        ax12.grid(True)
+        ax12.xaxis.set_major_formatter(mtk.FuncFormatter(format_date))
+        ax12.legend(loc='upper left')
+        fig.autofmt_xdate()
+
         ax2 = fig.add_subplot(gs[1:6, 0:1], sharex=ax3)
         #ax2.set_title("candlestick", fontsize='xx-large', fontweight='bold')
 
         mpf.candlestick_ochl(ax2, quotes, width=0.6, colorup='r', colordown='g', alpha=1.0)
+
         #value = np.where(day.RTS>2,day.close,0)
         #win = np.where(day.TS>3,day.close,0)
         danger = np.where(day.TS<3,day.close,0)
@@ -545,15 +616,15 @@ def forceANA(code,zo=100,ty = 'EA',cg = 'stock', st = 20, mi = 60, ln = 120, pt=
     dd = prepareData(code,cg=cg)
     #import quant.Util as ut
     #ut.trendWeekMinv3(dd)
-    PlotBySe(dd,type = ty,zoom = zo, short = st, mid = mi, long = ln,plot=pt,numofax=nm,bias=bias)
+    PlotBySe(dd,type = ty,zoom = zo, short = st, mid = mi, long = ln,plot=pt,numofax=nm,bias=bias,cg=cg)
 
 
 
 if __name__ == "__main__":
 
-    #forceANA('002415',zo=500,ty = 'EA', cg = 'stock', st = 20, mi = 60, ln = 120, pt='SML',nm=3,bias=True)
+    forceANA('600089',zo=500,ty = 'EMA', cg = 'stock', st = 20, mi = 60, ln = 120, pt='SML',nm=3,bias=True)
     #api = QA.QA_TTSBroker()
-    test = QA.QA_fetch_get_stock_info('tdx','002415').liutongguben[0]
-    print(test)
+    #test = QA.QA_fetch_get_stock_info('tdx','002415').liutongguben[0]
+    #print(test)
 
 

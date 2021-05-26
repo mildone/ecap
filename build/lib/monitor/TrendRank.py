@@ -69,7 +69,7 @@ def TrendRank(start = '2015-01-01'):
 
     return sample
 
-def TrendRankCodes(codelist, start = '2015-01-01'):
+def TrendRankCodes(codelist, start = '2018-01-01'):
 
     cur = datetime.datetime.now()
     mon = str(cur.month)
@@ -169,13 +169,33 @@ def plot(day, short=20, mid=60, long=120):
 '''
 
 
+def formIndustry(file):
+    '''
+    together with MarketView to check the block with trending on
+    file = '/Users/jiangyongnan/Downloads/zz800.csv'
+    '''
+    td = pd.read_csv(file, index_col='Unnamed: 0')
+    industry = {}
+    for i in range(len(td)):
+        if (td.sw_l1[i] in industry.keys()):
+            industry.get(td.sw_l1[i]).append(td.index[i][:6])
+        else:
+            industry[td.sw_l1[i]] = [td.index[i][:6]]
+
+    return industry
 
 
 if __name__ == "__main__":
-    res = TrendRank(start = '2019-01-01')
+    #res = TrendRank(start = '2019-01-01')
+    m = formIndustry('/Users/jiangyongnan/Downloads/zz800.csv')
+    codes = m.get('非银金融I')
+    print('{} with {}'.format(codes,len(codes)))
+    res = TrendRankCodes(codes)
     res = res.sort_values(by=['date','CS','SM'],axis=0,ascending=[True,True,True])
+    print(res)
     #codelist = res[-30:]['code'].to_list()
-    print(res[-30:].index.get_level_values('code').tolist())
+    #print(codelist)
+
 
 
 

@@ -37,9 +37,10 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     #t60qu = uti.candlestruct(t60)
     #t15qu = uti.candlestruct(t15)
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(100, 90), dpi=30)
+    #fig = plt.figure()
     gs = gridspec.GridSpec(12, 9)
-    fig.set_size_inches(100.5, 90.5)
+    #fig.set_size_inches(100.5, 90.5)
 
 
     if (zoom > t15.shape[0]):
@@ -77,12 +78,12 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
 
 
     ratio = t15.low.median() * 0.03
-    ax2.plot(N1 - short, t15.low[N1 - short] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax2.plot(N1 - short, t15.low[N1 - short] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
              markeredgecolor='red')
     # ax2.axvline(x=N-short,ls='--',color='purple')
-    ax2.plot(N1 - mid, t15.low[N1 - mid] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax2.plot(N1 - mid, t15.low[N1 - mid] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
              markeredgecolor='blue')
-    ax2.plot(N1 - long, t15.low[N1 - long] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax2.plot(N1 - long, t15.low[N1 - long] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
              markeredgecolor='purple')
 
     #ax2.xaxis.set_major_formatter(mtk.FuncFormatter(format_date))
@@ -130,12 +131,12 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     ax3.plot(ind6, t60.long, 'purple', label='long', linewidth=0.7)
 
     ratio = t60.low.median() * 0.03
-    ax3.plot(N6 - short, t60.low[N6 - short] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax3.plot(N6 - short, t60.low[N6 - short] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='red')
     # ax2.axvline(x=N-short,ls='--',color='purple')
-    ax3.plot(N6 - mid, t60.low[N6 - mid] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax3.plot(N6 - mid, t60.low[N6 - mid] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='blue')
-    ax3.plot(N6 - long, t60.low[N6 - long] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax3.plot(N6 - long, t60.low[N6 - long] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='purple')
     ax3.legend(loc='best')
     ax3.xaxis.set_major_formatter(mtk.FuncFormatter(format6_date))
@@ -178,12 +179,12 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     ax31.plot(ind, td.mi, 'blue', label='mid', linewidth=0.7)
     ax31.plot(ind,td.lo, 'purple',label='long', linewidth=0.7)
     ratio = td.low.median()*0.03
-    ax31.plot(N - short, td.low[N - short] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax31.plot(N - short, td.low[N - short] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
              markeredgecolor='red')
     # ax2.axvline(x=N-short,ls='--',color='purple')
-    ax31.plot(N - mid, td.low[N - mid] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax31.plot(N - mid, td.low[N - mid] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
              markeredgecolor='blue')
-    ax31.plot(N - long, td.low[N - long] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+    ax31.plot(N - long, td.low[N - long] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
              markeredgecolor='purple')
 
     ax31.grid(True)
@@ -220,7 +221,7 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     mpf.candlestick_ochl(ax21, wqu, width=0.6, colorup='r', colordown='g', alpha=1.0)
     #this applies the same as we take week CS<0 as exit
     print('check the weektrend in console')
-    print(wk)
+    #print(wk)
 
     ax21.plot(indw, wk.short, 'r-', label='short', linewidth=0.5, ls = '--')
     ax21.plot(indw, wk.mid, 'blue', label='mid', linewidth=0.5,ls='--')
@@ -231,16 +232,16 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     ax21.plot(indw, wk.lo, 'purple', label='long MA', linewidth=0.7)
     ratio = wk.low.median() * 0.03
     if(NW>wshort):
-        ax21.plot(NW - wshort, wk.low[NW - wshort] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+        ax21.plot(NW - wshort, wk.low[NW - wshort] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='red')
     else:
         pass
     # ax2.axvline(x=N-short,ls='--',color='purple')
     if(NW>wmid):
-        ax21.plot(NW - wmid, wk.low[NW - wmid] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+        ax21.plot(NW - wmid, wk.low[NW - wmid] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='blue')
     if(NW>wlong):
-        ax21.plot(NW - wlong, wk.low[NW - wlong] - ratio, '^', markersize=4, markeredgewidth=2, markerfacecolor='None',
+        ax21.plot(NW - wlong, wk.low[NW - wlong] - ratio, '^', markersize=10, markeredgewidth=2, markerfacecolor='None',
               markeredgecolor='purple')
 
 
@@ -260,7 +261,7 @@ def compView(code, start, end,short = 20, mid = 60, long = 120,zoom=300,cg='stoc
     plt.show()
 
 if __name__ == '__main__':
-    compView('600897','2018-01-01','cur',zoom=500,cg='stock')
+    compView('000001','2018-01-01','cur',zoom=500,cg='index')
 
 
 

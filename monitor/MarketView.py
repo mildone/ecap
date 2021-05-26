@@ -10,6 +10,7 @@ import matplotlib
 from datetime import datetime
 import seaborn as sns
 import QUANTAXIS as QA
+import os
 #api of jqdatasdk: https://www.joinquant.com/help/api/help#name:JQDataHttp
 
 def normlizeCode(codes):
@@ -103,13 +104,13 @@ if __name__ == '__main__':
 
     # 获取每个行业 以及 获取每个行业包含中证800的成分股的个数
     zz800 = get_index_stocks('000906.XSHG')
-    zz800.to_csv()
+   #zz800.to_csv()
 
     test, err = formData(zz800)
     zz800_industry = get_industry(zz800, date=datetime.strftime(datetime.today(), '%Y-%m-%d'))
     zz800_industry = pd.DataFrame(zz800_industry).T[[industry_type]]
     zz800_industry[industry_type] = zz800_industry[industry_type].apply(lambda x: x['industry_name'])
-    print(zz800_industry)
+    #print(zz800_industry)
     industries = zz800_industry[industry_type]
     industries = list(set(industries))
     industries.sort()
@@ -229,7 +230,10 @@ if __name__ == '__main__':
             plt.yticks(size=15)
 
     print('done saving')
-    plt.savefig("/Users/jiangyongnan/Downloads/market_width.png", dpi=225)
+    filename = '/Users/jiangyongnan/Downloads/marketView/'+'market_width_'+datetime.now().strftime('%m-%d')+'.png'
+    #if os.path.exists('/Users/jiangyongnan/Downloads/market_width.png'):
+         #os.remove('/Users/jiangyongnan/Downloads/market_width.png')
+    plt.savefig(filename, dpi=225)
 
     #plt.show()
     print('done')

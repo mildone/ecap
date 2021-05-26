@@ -180,6 +180,7 @@ def divergence( day,short = 20, mid = 60, long = 120):
     day['long'] = QA.EMA(day.close, long)
     day['lo'] = QA.MA(day.close, long)
     day['mi'] = QA.MA(day.close, mid)
+    day['vol6'] = QA.EMA(day.volume,mid)
     day['sh'] = QA.MA(day.close, short)
     day['mid'] = QA.EMA(day.close, mid)
     day['short'] = QA.EMA(day.close, short)
@@ -235,9 +236,9 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
         return day.index.get_level_values(dayindex)[thisind]
 
     if(numofax==1):
-        fig = plt.figure()
+        fig = plt.figure(figsize=(40, 20), dpi=90)
         gs = gridspec.GridSpec(3, 1)
-        fig.set_size_inches(30.5, 20.5)
+        #fig.set_size_inches(30.5, 20.5)
         ax2 = fig.add_subplot(gs[1:3,0:1])
         ax2.set_title("candlestick", fontsize='xx-large', fontweight='bold')
 
@@ -348,8 +349,9 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
 
         plt.show()
     elif(numofax==3):
-        fig = plt.figure()
-        fig.set_size_inches(40.5, 20.5)
+        fig = plt.figure(figsize=(40, 20), dpi=90)
+        #plt.figure()
+        #fig.set_size_inches(40.5, 20.5)
         gs = gridspec.GridSpec(9, 1)
 
         ax3 = fig.add_subplot(gs[0:1, 0:1])
@@ -386,7 +388,8 @@ def PlotBySe(day, short = 20, mid = 60, long = 120,type='EA',zoom=100,plot='SML'
 
         #ax1.plot(ind,day.trend,'red',label='trend',linewidth=1)
         # ax3.plot(ind,day.vma,'orange',label='volume EMA20')
-        ax1.axhline(y=day.volume.median(), ls='--', color='grey')
+        #ax1.axhline(y=day.volume.median(), ls='--', color='grey')
+        ax1.plot(ind,day.vol6,'grey',label='vol EMA60',linewidth=0.5)
         # x3.bar(ind,day.BIAS,color='blue')
         # ax3.axhline(y=0,ls='--',color='yellow')
         ax1.grid(True)
@@ -619,7 +622,7 @@ def forceANA(code,zo=100,ty = 'EA',cg = 'stock', st = 20, mi = 60, ln = 120, pt=
 
 if __name__ == "__main__":
 
-    forceANA('600019',zo=500,ty = 'EMA', cg = 'stock', st = 20, mi = 60, ln = 120, pt='SML',nm=3,bias=True)
+    forceANA('600089',zo=500,ty = 'EMA', cg = 'stock', st = 20, mi = 60, ln = 120, pt='SML',nm=3,bias=True)
     #api = QA.QA_TTSBroker()
     #test = QA.QA_fetch_get_stock_info('tdx','002415').liutongguben[0]
     #print(test)

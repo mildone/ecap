@@ -2027,7 +2027,7 @@ def trendWeekMinv3RTS(sample,short=20, long=60, freq='15min'):
     print('*'*100)
 
     sample.fillna(method='ffill',inplace=True)
-    #sample = util.divergence(sample)
+    sample = util.divergence(sample)
 
 
     wstart = '2010-01-01'
@@ -2091,6 +2091,7 @@ def trendWeekMinv3RTS(sample,short=20, long=60, freq='15min'):
         if(direction>0
                 and trendv >0
                 and sing==1
+                #and sample.CS[i]>0
                 #and temp.CS[-1]>0
                 #and temp.SM[-1]>0
                 #and wd.loc[windex].BIAS<bechmark
@@ -2676,7 +2677,7 @@ def backtestv2(holdingperc = 3):
     cur = datetime.datetime.now()
     # endtime = str(cur.year) + '-' + str(cur.month) + '-' + str(cur.day)
     #endtime = '2020-06-01'
-    endtime = '2021-04-01'
+    endtime = '2021-05-07'
 
     #add trend code
     '''
@@ -2692,9 +2693,10 @@ def backtestv2(holdingperc = 3):
     '''
     cl = ['000977', '600745',
           #'002889',
+          '000333',
           '600340','000895','600019',
         '600585','002415','002475','600031','600276','600009','601318','002230','600875',
-          '000333','600031','002384','002241','600703','000776','600897','600085',
+          '600031','002384','002241','600703','000776','600897','600085',
           #'000651','300054','300046','002352',
           #'600438',
           '000651',
@@ -2884,7 +2886,7 @@ def backtestv22(holdingperc = 3):
     print('init account')
     Account = QA.QA_Account(user_cookie='eric', portfolio_cookie='eric')
     Broker = QA.QA_BacktestBroker()
-    Account.reset_assets(100000)
+    Account.reset_assets(150000)
     Account.account_cookie = 'ECAP'
     # codelist=['600797','000977','601068','601069','000977']
     # 云计算，华为，5G概念
@@ -2910,7 +2912,7 @@ def backtestv22(holdingperc = 3):
     cur = datetime.datetime.now()
     # endtime = str(cur.year) + '-' + str(cur.month) + '-' + str(cur.day)
     #endtime = '2020-06-01'
-    endtime = '2021-01-26'
+    endtime = '2021-05-01'
 
     #add trend code
     '''
@@ -2925,10 +2927,24 @@ def backtestv22(holdingperc = 3):
     print(cl)
     '''
     cl = ['000977', '600745',
-          #'002889',
-          '600340','000895','600019',
-        '600585','002415','002475','600031','600276','600009','601318','002230',
-          '000333','600031','002384','002241','600703','000776','600897','600085']
+          # '002889',
+          '000333',
+          '600340', '000895', '600019',
+          '600585', '002415', '002475', '600031', '600276', '600009', '601318', '002230', '600875',
+          '600031', '002384', '002241', '600703', '000776', '600897', '600085',
+          # '000651','300054','300046','002352',
+          # '600438',
+          '000651',
+          '601318',
+          '600036',
+          '300059',
+          # 消费ETF 成分股
+          #'300015',
+          '600089',
+          '300498',
+          '600438',
+          '600887'
+          ]
     codelist2.extend(cl)
     codelist = list(set(codelist2))
     # data = loadLocalData(cl, '2019-01-01', endtime)
@@ -2937,7 +2953,7 @@ def backtestv22(holdingperc = 3):
 
     zz800 = pd.read_csv('/Users/jiangyongnan/backup/StockPrediction-/data/zz_800.csv')
     zzcode = list(zz800.code)
-    cl = zzcode
+    #cl = zzcode
 
 
     if('515880' in test or '515050' in test):
@@ -2976,7 +2992,8 @@ def backtestv22(holdingperc = 3):
     #ind = data.add_func(DTWM)
     #ind = data.add_func(trendWeekMinv3)
 
-    ind = data.add_func(trendWeekMinv32)
+    #ind = data.add_func(trendWeekMinv32)
+    ind = data.add_func(trendWeekMinv3RTS)
     #ind = data.add_func(buythedip)
 
 
@@ -2996,7 +3013,7 @@ def backtestv22(holdingperc = 3):
     #ind = data.add_func(EMAOP)
     # cur = datetime.datetime.now()
     # endtime = str(cur.year) + '-' + str(cur.month) + '-' + str(cur.day)
-    data_forbacktest = data.select_time('2019-01-01', endtime)
+    data_forbacktest = data.select_time('2020-01-01', endtime)
     deal = {}
     for items in data_forbacktest.panel_gen:
         for item in items.security_gen:
@@ -3346,8 +3363,8 @@ def main():
         print('*'*200)
     '''
 
-    backtestv2()
-    #backtestv22()
+    #backtestv2()
+    backtestv22()
     #test = QA.QA_fetch_stock_day_adv('000977','2018-01-01','2019-01-01').data
     #test['single']=0
     #triNetv3(test)

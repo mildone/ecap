@@ -183,6 +183,14 @@ def contextPlot(df,start='2020-01-01',end='cur'):
     fig.autofmt_xdate()
 
     plt.show()
+def blockCode(block):
+    '''
+    e.g. blockcode('深证300')
+    '''
+    stocklist = QA.QA_fetch_stock_block_adv().data
+    code = stocklist.loc[block].index.get_level_values('code').to_list()
+    return code
+
 
 def updateRecord(df):
     df.to_csv('/Users/jiangyongnan/git/ecap/monitor/marketwidth.csv')

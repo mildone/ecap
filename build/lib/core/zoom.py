@@ -49,6 +49,9 @@ def divergence(wk, short=10, mid=20, long=30):
     wk['CS'] = (wk.close - wk.short) * 100 / wk.short
     wk['SM'] = (wk.short - wk.mid) * 100 / wk.mid
     wk['ML'] = (wk.mid - wk.long) * 100 / wk.long
+    wk['CSMA'] = (wk.close - wk.sh) * 100 / wk.sh
+    wk['SMMA'] = (wk.sh - wk.mi) * 100 / wk.mi
+    wk['MLMA'] = (wk.mi - wk.lo) * 100 / wk.lo
     return wk
 
 
